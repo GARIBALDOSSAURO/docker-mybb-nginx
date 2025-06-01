@@ -1,0 +1,45 @@
+name: mybb
+services:
+  mybb:
+    cpu_shares: 90
+    command: []
+    container_name: mybb
+    deploy:
+      resources:
+        limits:
+          memory: 2048M
+    hostname: mybb
+    image: gugajedi/mybb-nginx:latest
+    labels:
+      icon: https://i.imgur.com/PKIPzhN.png
+    ports:
+      - target: 80
+        published: "8081"
+        protocol: tcp
+    restart: unless-stopped
+    volumes:
+      - type: bind
+        source: /DATA/AppData/$AppID/app
+        target: /var/www/html
+    devices: []
+    cap_add: []
+    environment: []
+    networks:
+      - mybb-network
+    privileged: false
+networks:
+  mybb-network:
+    name: mybb-network
+x-casaos:
+  author: self
+  category: self
+  hostname: 
+  icon: https://i.imgur.com/PKIPzhN.png
+  index: /
+  is_uncontrolled: false
+  port_map: "8081"
+  scheme: http
+  store_app_id: mybb
+  title:
+    custom: ""
+    en_us: mybb

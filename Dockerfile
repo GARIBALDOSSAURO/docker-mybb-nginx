@@ -74,13 +74,22 @@ RUN { \
 		echo 'html_errors = Off'; \
 	} > /usr/local/etc/php/conf.d/error-logging.ini
 
+# RUN { \
+#         echo 'session.save_handler = redis'; \
+#         echo 'session.save_path = "tcp://redis:6379"'; \
+#         echo 'redis.session.locking_enabled = 1'; \
+#         echo 'redis.session.lock_expire = 30'; \
+#         echo 'redis.session.lock_retries = 10'; \
+#         echo 'redis.session.lock_wait_time = 2000'; \
+#     } > /usr/local/etc/php/conf.d/redis-session.ini
+
 RUN { \
-                echo 'file_uploads=On'; \
-                echo 'upload_max_filesize=50M'; \
-                echo 'post_max_size=50M'; \
-                echo 'max_execution_time=40'; \
-                echo 'memory_limit=256M'; \
-        } > /usr/local/etc/php/conf.d/mybb-recommended.ini
+        echo 'file_uploads=On'; \
+        echo 'upload_max_filesize=50M'; \
+        echo 'post_max_size=50M'; \
+        echo 'max_execution_time=40'; \
+        echo 'memory_limit=256M'; \
+    } > /usr/local/etc/php/conf.d/mybb-recommended.ini
 
 ENV MYBB_VERSION=$BUILD_VERSION
 ENV MYBB_SHA512=$BUILD_SHA512SUM
@@ -93,7 +102,7 @@ RUN set -ex; \
 	chown -R www-data:www-data /usr/src/mybb-mybb_${MYBB_VERSION}
 
 RUN set -ex; \
-	apk add --no-cache nginx
+	apk add --no-cache nginx busybox-extras curl
 
 RUN rm -f /etc/nginx/http.d/default.conf
 RUN mkdir -p /run/nginx

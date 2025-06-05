@@ -1,21 +1,62 @@
+# docker build --no-cache --build-arg BUILD_AUTHORS="HCALDE21 <hcalde21@skywalker.net.br>" --build-arg BUILD_DATE=$([System.DateTime]::UtcNow.ToString("yyyy-MM-ddTHH:mm:ssZ")) --build-arg BUILD_SHA512SUM="49f2b6c3c759be576570b0d92e7763e440ca9cd002207d3aa006ae004cdbb51dbdc2db926c04d387ca475c7aa8b108e107bb5b639e1628e6ea637ea562aa9c22" --build-arg BUILD_VERSION="1838" --tag gugajedi/mybb-nginx:latest -f Dockerfile .
 name: mybb
 services:
   mybb:
-    container_name: mybb
-    hostname: mybb
-    image: gugajedi/mybb-nginx:php83
+    container_name: ${CONTAINER_NAME:-mybb}-app
+    hostname: ${CONTAINER_NAME:-mybb}-app
+    image: gugajedi/mybb-nginx:latest
     ports:
-      - "8081:80"
+      - ${PORT_HTTP:-83}:80
     networks:
       - mybb-network
     volumes:
       - ./app:/var/www/html:rw
+      - ./info.php:/var/www/html/info.php:ro
+      - ./redis-session.ini:/usr/local/etc/php/conf.d/redis-session.ini
     healthcheck:
       test: ["CMD", "php-fpm", "-t"]
       interval: 30s
       timeout: 10s
       retries: 5
     restart: unless-stopped
+
+  redis:
+    container_name: ${CONTAINER_NAME:-mybb}-redis
+    hostname: ${CONTAINER_NAME:-mybb}-redis
+    image: redis:latest
+    networks:
+      - mybb-network
+    volumes:
+      - redis:/data
+    healthcheck:
+      test: ["CMD-SHELL", "redis-cli ping | grep PONG"]
+      interval: 5s
+      timeout: 10s
+      retries: 5
+
+  db:
+    container_name: ${CONTAINER_NAME:-mybb}-db
+    hostname: ${CONTAINER_NAME:-mybb}-db
+    image: mariadb:lts
+    environment:
+      - MARIADB_ROOT_PASSWORD=piUoQkAVBWSVsrjFhMum4aWbDZkD2H8T
+      - MARIADB_DATABASE=${CONTAINER_NAME:-mybb}-db
+      - MARIADB_USER=${CONTAINER_NAME:-mybb}-db
+      - MARIADB_PASSWORD=fHfcb91wBZEsVy60rksYl5V05HQARa6J
+    restart: always
+    volumes:
+      - db:/var/lib/mysql
+      - ./mariadb.cnf:/etc/mysql/mariadb.conf.d/custom.cnf:ro
+    ports:
+      - ${PORT_DB:-33183}:3306
+    networks:
+      - mybb-network
+
+volumes:
+  db:
+    name: ${CONTAINER_NAME:-mybb}-db
+  redis:
+    name: ${CONTAINER_NAME:-mybb}-redis
 
 networks:
   mybb-network:

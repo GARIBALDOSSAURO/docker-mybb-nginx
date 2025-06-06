@@ -19,7 +19,7 @@ services:
       timeout: 10s
       retries: 5
     restart: unless-stopped
-
+    
   redis:
     container_name: ${CONTAINER_NAME:-mybb}-redis
     hostname: ${CONTAINER_NAME:-mybb}-redis
